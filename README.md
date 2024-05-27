@@ -1,42 +1,3 @@
-# containerd_rails
-
-Commands run:
-rails new containerd_rails (to use sqlite3 database)
-docker build -t app_image . (built image directly as rails ships with Dockerfile by default)
-docker images
-docker run -it --user root --rm --entrypoint bash app_image (to get in the container, generate master key if using production as environment using:
-        rails credentials:edit)
-(Changed ENV to development, else RAILS_MASTER_KEY to be provided using:
-        docker run -p 3000:3000 -e RAILS_MASTER_KEY=1234567890 app_image)
-CMD[".bin/rails", "server", "-b", "0.0.0.0"] in Dockerfile, to enable binding to all servers
-
-# Developing in Docker using Bind Mounts
-docker run -p 3000:3000 -v $(pwd):/rails app_image
-This way whatever changes we make will be visible in the app right away without having to rebuild the image
-
-So a single container rails app is up, now let's set up a multi container application
-# Multi-container application (branch: multi-container)
-Create docker-compose file
-Make changes to include pg instead of sqlite3 in Gemfile and Dockerfile, database.yml (host == service_name in docker-compose.yml) and .env file
-
-Commands:
-docker-compose exec web bash
--> bin/rails db:create
--> bin/rails g scaffold Post title:string content:text
--> bin/rails db:migrate
-
-docker compose restart web
-
-# Logs:
-docker compose logs db
-docker compose logs web
-
-# Restarting:
-docker-compose down
-docker-compose up -d --build (-d: detached)
-
-
-
 # Containerd Rails
 
 ## Overview
@@ -130,3 +91,8 @@ To restart the application:
     ```sh
     docker-compose up -d --build
     ```
+
+### Clean everything
+```sh
+docker system prune -a
+```
